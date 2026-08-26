@@ -1,0 +1,4 @@
+services:
+  # Add project services here as they are implemented.
+  placeholder:
+    image: hello-world
