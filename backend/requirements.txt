@@ -1,7 +1,4 @@
-# Rare Disease Repository - Project Dependencies
-# Backend-specific deps are in backend/requirements.txt
-
-# Backend
+# Rare Disease Repository - Backend Dependencies
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 sqlalchemy[asyncio]>=2.0.35
