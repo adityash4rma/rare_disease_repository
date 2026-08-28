@@ -5,7 +5,7 @@ import {
   Search, Bell, Mail, HelpCircle, CheckCircle2, 
   Plus, ChevronLeft, ChevronRight, Activity, Dna, 
   Camera, Stethoscope, TrendingUp, X, 
-  FileText, Landmark, Users, Sparkles
+  FileText, Landmark, Users, Sparkles, Database
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -27,6 +27,14 @@ interface Study {
   description: string;
   biomarkers: string[];
   orphanDrug: string;
+}
+
+interface DataDictionaryField {
+  field: string;
+  category: 'Demographics' | 'Clinical Onset' | 'Genetics' | 'Biomarkers & Labs' | 'Therapeutics & Outcomes';
+  type: string;
+  example: string;
+  desc: string;
 }
 
 const allStudiesData: Study[] = [
@@ -224,19 +232,52 @@ const allStudiesData: Study[] = [
   }
 ];
 
-const dataDictionaryItems = [
-  { field: 'Patient_ID', type: 'String (UUID / Code)', desc: 'Unique anonymized patient identifier (e.g. IND-RDR-0001).' },
-  { field: 'Rare_Disease_Name', type: 'Categorical', desc: 'Verified clinical diagnosis (SMA, Wilson Disease, Gaucher Disease, Alkaptonuria).' },
-  { field: 'Mutated_Gene', type: 'String (HGNC)', desc: 'Causal human gene locus (SMN1, ATP7B, GBA, HGD).' },
-  { field: 'Specialized_Biomarker_Name', type: 'String', desc: 'Target clinical biomarker (e.g. Serum Ceruloplasmin, Urinary HGA, Lyso-Gb1).' },
-  { field: 'Biomarker_Value', type: 'Float / Unit', desc: 'Measured quantitative biomarker laboratory result.' },
-  { field: 'Clinical_Severity_Score_1_10', type: 'Integer (1-10)', desc: 'Standardized clinical disease severity index.' },
-  { field: 'Systolic_BP_mmHg / Diastolic_BP_mmHg', type: 'Integer', desc: 'Resting hemodynamic blood pressure vitals.' },
-  { field: 'ALT_U_L / AST_U_L', type: 'Float (U/L)', desc: 'Liver function transaminase enzymatic assays.' },
-  { field: 'Serum_Creatinine_mg_dL', type: 'Float (mg/dL)', desc: 'Renal function and filtration biomarker.' },
-  { field: 'Platelet_Count_cells_mcL', type: 'Integer (cells/mcL)', desc: 'Hematological platelet count (critical for Gaucher/Wilson).' },
-  { field: 'Prescribed_Orphan_Drug', type: 'String (INN)', desc: 'Targeted rare disease therapeutic regimen.' },
-  { field: 'Clinical_Outcome_Target', type: 'Binary Target', desc: 'High Risk (Progressive) vs Therapeutic Responder (Stable).' },
+const allDataDictionaryFields: DataDictionaryField[] = [
+  // 1. Demographics
+  { field: 'Patient_ID', category: 'Demographics', type: 'String (Code)', example: 'IND-RDR-0001', desc: 'Unique anonymized patient cohort identifier.' },
+  { field: 'Gender', category: 'Demographics', type: 'Categorical', example: 'Male / Female', desc: 'Biological sex assigned at birth.' },
+  { field: 'State_of_Origin', category: 'Demographics', type: 'Categorical', example: 'Karnataka, UP, Delhi...', desc: 'Indian state / territory of patient residence.' },
+  { field: 'Geographical_Zone', category: 'Demographics', type: 'Categorical', example: 'North, South, West, East', desc: 'Regional hospital network zone.' },
+  { field: 'Geographic_Settlement', category: 'Demographics', type: 'Categorical', example: 'Urban Metro, Rural', desc: 'Environmental habitat classification.' },
+  { field: 'Socioeconomic_Status', category: 'Demographics', type: 'Categorical', example: 'Middle, Lower-Middle', desc: 'Modified Kuppuswamy socioeconomic index.' },
+  { field: 'Avg_AQI_Exposure', category: 'Demographics', type: 'Integer (Index)', example: '185', desc: '3-year average particulate matter exposure.' },
+
+  // 2. Clinical Onset
+  { field: 'Rare_Disease_Name', category: 'Clinical Onset', type: 'Categorical', example: 'Wilson Disease, SMA...', desc: 'Verified clinical disease classification.' },
+  { field: 'Age_at_Onset_Years', category: 'Clinical Onset', type: 'Float (Years)', example: '8.4', desc: 'Patient age when initial symptoms presented.' },
+  { field: 'Age_at_Diagnosis_Years', category: 'Clinical Onset', type: 'Float (Years)', example: '11.2', desc: 'Patient age at definitive diagnosis.' },
+  { field: 'Diagnostic_Delay_Months', category: 'Clinical Onset', type: 'Integer (Months)', example: '33', desc: 'Diagnostic odyssey time elapsed between onset and diagnosis.' },
+  { field: 'Clinical_Severity_Score_1_10', category: 'Clinical Onset', type: 'Integer (1-10)', example: '7', desc: 'Physician-graded clinical disability severity score.' },
+  { field: 'Consanguineous_Marriage_History', category: 'Clinical Onset', type: 'Binary', example: 'Yes / No', desc: 'Documented parental consanguinity.' },
+
+  // 3. Genetics & Specialized Biomarkers
+  { field: 'Mutated_Gene', category: 'Genetics', type: 'String (HGNC)', example: 'SMN1, ATP7B, GBA, HGD', desc: 'Causal human rare disease gene locus.' },
+  { field: 'Mutation_Type', category: 'Genetics', type: 'Categorical', example: 'Homozygous Deletion, Missense', desc: 'Pathogenic molecular variant type.' },
+  { field: 'Specialized_Biomarker_Name', category: 'Genetics', type: 'String', example: 'Serum Ceruloplasmin, Lyso-Gb1', desc: 'Target disease-specific laboratory biomarker.' },
+  { field: 'Biomarker_Value', category: 'Genetics', type: 'Float', example: '14.2', desc: 'Measured quantitative biomarker laboratory result.' },
+  { field: 'Biomarker_Unit', category: 'Genetics', type: 'String', example: 'mg/dL, ng/mL, mmol/mol Cr', desc: 'Biomarker concentration measurement unit.' },
+
+  // 4. Biomarkers & Labs
+  { field: 'Systolic_BP_mmHg', category: 'Biomarkers & Labs', type: 'Integer (mmHg)', example: '118', desc: 'Resting systolic arterial blood pressure.' },
+  { field: 'Diastolic_BP_mmHg', category: 'Biomarkers & Labs', type: 'Integer (mmHg)', example: '76', desc: 'Resting diastolic arterial blood pressure.' },
+  { field: 'Heart_Rate_bpm', category: 'Biomarkers & Labs', type: 'Integer (bpm)', example: '82', desc: 'Resting pulse rate beats per minute.' },
+  { field: 'Body_Temp_Celsius', category: 'Biomarkers & Labs', type: 'Float (°C)', example: '37.1', desc: 'Core body temperature.' },
+  { field: 'BMI', category: 'Biomarkers & Labs', type: 'Float (kg/m²)', example: '21.4', desc: 'Body Mass Index.' },
+  { field: 'Hemoglobin_g_dL', category: 'Biomarkers & Labs', type: 'Float (g/dL)', example: '12.8', desc: 'CBC total blood hemoglobin concentration.' },
+  { field: 'WBC_Count_cells_mcL', category: 'Biomarkers & Labs', type: 'Integer (cells/µL)', example: '6,400', desc: 'Complete white blood cell count.' },
+  { field: 'Platelet_Count_cells_mcL', category: 'Biomarkers & Labs', type: 'Integer (cells/µL)', example: '185,000', desc: 'Thrombocyte count.' },
+  { field: 'Serum_Creatinine_mg_dL', category: 'Biomarkers & Labs', type: 'Float (mg/dL)', example: '0.9', desc: 'Renal function filtration marker.' },
+  { field: 'ALT_U_L', category: 'Biomarkers & Labs', type: 'Float (U/L)', example: '42.5', desc: 'Alanine aminotransferase hepatic enzyme.' },
+  { field: 'AST_U_L', category: 'Biomarkers & Labs', type: 'Float (U/L)', example: '38.1', desc: 'Aspartate aminotransferase liver enzyme.' },
+
+  // 5. Therapeutics & Outcomes
+  { field: 'Prescribed_Orphan_Drug', category: 'Therapeutics & Outcomes', type: 'String (INN)', example: 'Risdiplam, Nitisinone...', desc: 'Targeted rare disease therapeutic regimen.' },
+  { field: 'Treatment_Funding_Source', category: 'Therapeutics & Outcomes', type: 'Categorical', example: 'NPRD Gov Grant, CoE Aid', desc: 'Financial drug access scheme.' },
+  { field: 'Medication_Adherence_Rate_Pct', category: 'Therapeutics & Outcomes', type: 'Float (%)', example: '94.5%', desc: '12-month patient therapeutic compliance.' },
+  { field: 'Visit_Number', category: 'Therapeutics & Outcomes', type: 'Integer', example: '1, 2, 3...', desc: 'Longitudinal clinical checkpoint number.' },
+  { field: 'Months_Since_Baseline', category: 'Therapeutics & Outcomes', type: 'Integer (Months)', example: '18', desc: 'Follow-up duration since registry enrollment.' },
+  { field: 'Age_At_Visit_Years', category: 'Therapeutics & Outcomes', type: 'Float (Years)', example: '12.8', desc: 'Patient age at follow-up observation.' },
+  { field: 'Clinical_Outcome_Target', category: 'Therapeutics & Outcomes', type: 'Binary Target', example: 'High Risk / Stable Responder', desc: 'Disease progression clinical trajectory target.' },
 ];
 
 const Research: FC = () => {
@@ -245,6 +286,8 @@ const Research: FC = () => {
 
   const [activeTab, setActiveTab] = useState<'studies' | 'dictionary'>('studies');
   const [searchTerm, setSearchTerm] = useState('');
+  const [dictSearch, setDictSearch] = useState('');
+  const [dictCategory, setDictCategory] = useState<string>('All');
   const [page, setPage] = useState(1);
   const pageSize = 5;
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
@@ -268,6 +311,18 @@ const Research: FC = () => {
     return filteredStudies.slice(startIndex, startIndex + pageSize);
   }, [filteredStudies, page, pageSize]);
 
+  // Filter dictionary fields
+  const filteredDictFields = useMemo(() => {
+    return allDataDictionaryFields.filter((f) => {
+      const matchesCategory = dictCategory === 'All' || f.category === dictCategory;
+      const matchesQuery = dictSearch.trim() === '' || 
+        f.field.toLowerCase().includes(dictSearch.toLowerCase()) || 
+        f.desc.toLowerCase().includes(dictSearch.toLowerCase()) ||
+        f.type.toLowerCase().includes(dictSearch.toLowerCase());
+      return matchesCategory && matchesQuery;
+    });
+  }, [dictSearch, dictCategory]);
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== page) {
       setPage(newPage);
@@ -288,7 +343,7 @@ const Research: FC = () => {
           <Search className="absolute left-4 top-3 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search studies by disease, protocol, center..." 
+            placeholder="Search studies, protocols, clinical fields..." 
             className="w-full pl-12 pr-4 py-2.5 bg-white rounded-full border-none shadow-sm outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
@@ -342,12 +397,12 @@ const Research: FC = () => {
           onClick={() => setActiveTab('dictionary')}
           className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative cursor-pointer ${activeTab === 'dictionary' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          Data Dictionary ({dataDictionaryItems.length} Fields)
+          Data Dictionary ({allDataDictionaryFields.length} Fields)
           {activeTab === 'dictionary' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-600 rounded-full" />}
         </button>
       </nav>
 
-      {/* 4. Table Content */}
+      {/* 4. Tab Content */}
       {activeTab === 'studies' ? (
         <>
           <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm mb-6">
@@ -463,30 +518,88 @@ const Research: FC = () => {
           </div>
         </>
       ) : (
-        /* Data Dictionary Table */
-        <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm p-6 mb-8">
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-800">10,000 Indian Clinical Cohort Schema</h3>
-            <p className="text-xs text-slate-400 mt-1">Field definitions and data dictionary specifications for research interoperability.</p>
+        /* Data Dictionary Tab */
+        <div className="space-y-6">
+          {/* Data Dictionary Controls */}
+          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+                <Database size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-800">10,000 Indian Clinical Cohort Schema</h3>
+                <p className="text-xs text-slate-400">Standardized field dictionary across 36 clinical, genetic, and longitudinal observation parameters.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="relative flex-1 md:w-64">
+                <Search size={14} className="absolute left-3 top-3 text-slate-400" />
+                <input 
+                  type="text"
+                  placeholder="Filter dictionary fields..."
+                  value={dictSearch}
+                  onChange={(e) => setDictSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 rounded-xl text-xs outline-none border border-transparent focus:border-indigo-200"
+                />
+              </div>
+
+              <select
+                value={dictCategory}
+                onChange={(e) => setDictCategory(e.target.value)}
+                className="px-3 py-2 bg-slate-50 rounded-xl text-xs font-bold text-slate-600 border border-transparent outline-none cursor-pointer"
+              >
+                <option value="All">All Categories (36)</option>
+                <option value="Demographics">Demographics (7)</option>
+                <option value="Clinical Onset">Clinical Onset (6)</option>
+                <option value="Genetics">Genetics (5)</option>
+                <option value="Biomarkers & Labs">Biomarkers & Labs (11)</option>
+                <option value="Therapeutics & Outcomes">Therapeutics & Outcomes (7)</option>
+              </select>
+            </div>
           </div>
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-[#E0E7FF]/30 text-[10px] text-slate-500 font-black uppercase tracking-widest">
-              <tr>
-                <th className="px-6 py-4">Field Name</th>
-                <th className="px-6 py-4">Data Type</th>
-                <th className="px-6 py-4">Description & Clinical Relevance</th>
-              </tr>
-            </thead>
-            <tbody className="text-xs text-slate-700">
-              {dataDictionaryItems.map((item) => (
-                <tr key={item.field} className="border-b border-slate-50 hover:bg-slate-50/50">
-                  <td className="px-6 py-3.5 font-mono font-bold text-indigo-700">{item.field}</td>
-                  <td className="px-6 py-3.5 font-semibold text-slate-500">{item.type}</td>
-                  <td className="px-6 py-3.5 text-slate-600">{item.desc}</td>
+
+          {/* Data Dictionary Table */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-[#E0E7FF]/30 text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                <tr>
+                  <th className="px-6 py-4">Field Name</th>
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4">Data Type</th>
+                  <th className="px-6 py-4">Example Value</th>
+                  <th className="px-6 py-4">Clinical Relevance & Description</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="text-xs text-slate-700">
+                {filteredDictFields.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-bold">
+                      No data dictionary fields match your search.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredDictFields.map((item) => (
+                    <tr key={item.field} className="border-b border-slate-50 hover:bg-slate-50/50">
+                      <td className="px-6 py-3.5 font-mono font-bold text-indigo-700">{item.field}</td>
+                      <td className="px-6 py-3.5">
+                        <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold">
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3.5 font-semibold text-slate-500">{item.type}</td>
+                      <td className="px-6 py-3.5 font-mono text-[11px] text-slate-600">{item.example}</td>
+                      <td className="px-6 py-3.5 text-slate-600">{item.desc}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider text-right px-2">
+            Showing {filteredDictFields.length} of {allDataDictionaryFields.length} Schema Fields
+          </p>
         </div>
       )}
 
