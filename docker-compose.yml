@@ -1,4 +1,69 @@
 services:
-  # Add project services here as they are implemented.
-  placeholder:
-    image: hello-world
+  api-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rare_disease_backend
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./rare_disease.db
+    networks:
+      - fl-network
+
+  fl-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fl_central_server
+    command: python federated_learning/server.py
+    ports:
+      - "8090:8090"
+    networks:
+      - fl-network
+
+  hospital-node-a:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hospital_node_a
+    command: python federated_learning/local_hospital_node.py --node-id A
+    environment:
+      - SERVER_ADDRESS=fl-server:8090
+    depends_on:
+      - fl-server
+    networks:
+      - fl-network
+
+  hospital-node-b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hospital_node_b
+    command: python federated_learning/local_hospital_node.py --node-id B
+    environment:
+      - SERVER_ADDRESS=fl-server:8090
+    depends_on:
+      - fl-server
+    networks:
+      - fl-network
+
+  hospital-node-c:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hospital_node_c
+    command: python federated_learning/local_hospital_node.py --node-id C
+    environment:
+      - SERVER_ADDRESS=fl-server:8090
+    depends_on:
+      - fl-server
+    networks:
+      - fl-network
+
+networks:
+  fl-network:
+    driver: bridge
