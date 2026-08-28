@@ -1,13 +1,14 @@
-import type { FC, ChangeEvent } from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   Search, Bell, Mail, HelpCircle, CheckCircle2, 
   Plus, ChevronLeft, ChevronRight, Activity, Dna, 
-  Camera, Stethoscope, TrendingUp, Info, MoreVertical 
+  Camera, Stethoscope, TrendingUp, Info 
 } from 'lucide-react';
 
-// --- Types (From your code) ---
+// --- Types ---
 type StudyType = 'clinical' | 'genetic' | 'imaging' | 'treatment';
+
 type Study = {
   id: number;
   name: string;
@@ -23,32 +24,36 @@ const sampleStudies: Study[] = [
   { id: 3, name: 'SMA-Study-2024', disease: 'Spinal Muscular Atrophy', patients: '756', availability: 'Available', types: ['clinical', 'genetic', 'imaging'] },
   { id: 4, name: 'SCD-Registry-01', disease: 'Sickle Cell Disease', patients: '1,120', availability: 'Available', types: ['clinical', 'genetic', 'treatment'] },
   { id: 5, name: 'Epi-Rare-2024', disease: 'Rare Epileptic Encephalopathy', patients: '512', availability: 'Requested', types: ['clinical', 'genetic'] },
+  { id: 6, name: 'CF-Dataset-002', disease: 'Cystic Fibrosis', patients: '1,100', availability: 'Available', types: ['clinical', 'genetic'] },
+  { id: 7, name: 'RareGen-Alpha', disease: 'Duchenne MD', patients: '450', availability: 'Available', types: ['clinical', 'imaging'] },
 ];
 
-const ResearchStudies: FC = () => {
+const Research: FC = () => {
   const [activeTab, setActiveTab] = useState<'studies' | 'dictionary'>('studies');
   const [searchTerm, setSearchTerm] = useState('');
   const [activePage, setActivePage] = useState(1);
-  const [studies, setStudies] = useState<Study[]>(sampleStudies);
 
-  // --- Search Logic ---
+  // Filter logic for the search bar
   const filteredStudies = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return studies;
-    return studies.filter((s) => s.name.toLowerCase().includes(query) || s.disease.toLowerCase().includes(query));
-  }, [searchTerm, studies]);
+    if (!query) return sampleStudies;
+    return sampleStudies.filter((study) => 
+      study.name.toLowerCase().includes(query) || 
+      study.disease.toLowerCase().includes(query)
+    );
+  }, [searchTerm]);
 
   return (
     <div className="flex-1 bg-[#F4F7FE] min-h-screen p-8 overflow-y-auto">
       
-      {/* 1. RARE-X Standard Header */}
+      {/* 1. Header Bar */}
       <header className="flex justify-between items-center mb-10">
         <div className="relative w-[500px]">
           <Search className="absolute left-4 top-3 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search for studies, datasets, institutions..." 
-            className="w-full pl-12 pr-4 py-2.5 bg-white rounded-full border-none shadow-sm outline-none focus:ring-2 focus:ring-indigo-400 text-sm" 
+            placeholder="Search for studies, diseases, institutions..." 
+            className="w-full pl-12 pr-4 py-2.5 bg-white rounded-full border-none shadow-sm outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -65,35 +70,36 @@ const ResearchStudies: FC = () => {
         </div>
       </header>
 
-      {/* 2. Page Title & Action */}
+      {/* 2. Page Title Section */}
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Research Studies</h1>
-          <p className="text-slate-400 text-sm mt-1 font-medium">Manage and explore research studies.</p>
+          <p className="text-slate-400 text-sm mt-1 font-medium">Manage and explore active research studies.</p>
         </div>
         <button className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold text-xs shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
           <Plus size={18} /> Create New Study
         </button>
       </div>
 
-      {/* 3. Tab Navigation */}
+      {/* 3. Navigation Tabs */}
       <nav className="flex gap-10 border-b border-slate-200 mb-10 px-4">
-        {[
-          { id: 'studies', label: 'All Studies' },
-          { id: 'dictionary', label: 'Data Dictionary' }
-        ].map(tab => (
-          <button 
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative ${activeTab === tab.id ? 'text-indigo-600' : 'text-slate-300 hover:text-slate-500'}`}
-          >
-            {tab.label}
-            {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-600 rounded-full" />}
-          </button>
-        ))}
+        <button 
+          onClick={() => setActiveTab('studies')}
+          className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'studies' ? 'text-indigo-600' : 'text-slate-300 hover:text-slate-500'}`}
+        >
+          All Studies
+          {activeTab === 'studies' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-600 rounded-full" />}
+        </button>
+        <button 
+          onClick={() => setActiveTab('dictionary')}
+          className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'dictionary' ? 'text-indigo-600' : 'text-slate-300 hover:text-slate-500'}`}
+        >
+          Data Dictionary
+          {activeTab === 'dictionary' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-600 rounded-full" />}
+        </button>
       </nav>
 
-      {/* 4. Content Area */}
+      {/* 4. Table Content */}
       {activeTab === 'studies' ? (
         <>
           <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm mb-6">
@@ -114,9 +120,7 @@ const ResearchStudies: FC = () => {
                     <td className="px-8 py-4 text-slate-800">{study.name}</td>
                     <td className="px-8 py-4">{study.disease}</td>
                     <td className="px-8 py-4 flex gap-1.5">
-                      {study.types.map(type => (
-                        <TypeBadge key={type} type={type} />
-                      ))}
+                      {study.types.map(type => <TypeBadge key={type} type={type} />)}
                     </td>
                     <td className="px-8 py-4 font-mono">{study.patients}</td>
                     <td className="px-8 py-4">
@@ -124,9 +128,7 @@ const ResearchStudies: FC = () => {
                         {study.availability}
                       </span>
                     </td>
-                    <td className="px-8 py-4 text-center">
-                      <button className="text-indigo-600 hover:underline">View</button>
-                    </td>
+                    <td className="px-8 py-4 text-center text-indigo-600 cursor-pointer hover:underline">View</td>
                   </tr>
                 ))}
               </tbody>
@@ -134,15 +136,15 @@ const ResearchStudies: FC = () => {
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center mb-10">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Showing 1 to {filteredStudies.length} of 240 datasets</p>
+          <div className="flex justify-between items-center mb-10 px-2">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Showing 1 to {filteredStudies.length} of 240 studies</p>
             <div className="flex gap-2">
               <button className="p-2 text-slate-300 hover:text-indigo-600"><ChevronLeft size={18}/></button>
               {[1, 2, 3, 4, 5].map(num => (
                 <button 
                   key={num} 
                   onClick={() => setActivePage(num)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs transition-all ${activePage === num ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' : 'text-slate-400 hover:bg-white'}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs transition-all ${activePage === num ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-white'}`}
                 >
                   {num}
                 </button>
@@ -170,7 +172,7 @@ const ResearchStudies: FC = () => {
   );
 };
 
-// --- Helper Components (Matching DatasetExplorer style) ---
+// --- Helper Components ---
 
 const TypeBadge = ({ type }: { type: StudyType }) => {
   const configs = {
@@ -194,4 +196,4 @@ const LegendItem = ({ icon: Icon, label, color }: any) => (
   </div>
 );
 
-export default ResearchStudies;
+export default Research;
