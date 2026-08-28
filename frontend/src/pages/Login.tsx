@@ -156,7 +156,7 @@ export default function Login() {
           </div>
 
           <p className="mt-10 text-center text-xs text-slate-400 font-medium">
-            Don't have an account? <Link to="/onboarding" className="text-indigo-600 font-bold hover:underline">Request Access</Link>
+            Don't have an account? <Link to="/signup" className="text-indigo-600 font-bold hover:underline">Sign Up</Link>
           </p>
         </div>
       </div>

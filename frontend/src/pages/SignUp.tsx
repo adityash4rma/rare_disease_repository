@@ -15,6 +15,7 @@ export function SignUp() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('researcher')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -31,7 +32,7 @@ export function SignUp() {
         email: email.trim(),
         password,
         full_name: fullName,
-        role: 'researcher',
+        role,
       })
       navigate('/')
     } catch (err: any) {
@@ -236,9 +237,34 @@ export function SignUp() {
                 </div>
               </label>
 
-              <p className="mb-4 mt-1 text-xs text-[#7e7e7e] 2xl:mb-7 2xl:text-base">
+              <p className="mb-4 mt-1 text-xs text-[#7e7e7e] 2xl:mb-5 2xl:text-base">
                 Must be at least 8 characters
               </p>
+
+              <label className="mb-4 flex flex-col gap-1.5 text-sm font-medium text-[#b4b4b4] 2xl:mb-5 2xl:gap-3 2xl:text-[19px]">
+                I am a
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'researcher', label: 'Researcher', emoji: '🔬' },
+                    { value: 'clinician', label: 'Clinician', emoji: '🩺' },
+                    { value: 'admin', label: 'Admin', emoji: '🛡️' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setRole(opt.value)}
+                      className={`h-11 flex items-center justify-center gap-2 border-2 text-sm font-semibold transition-all ${
+                        role === opt.value
+                          ? 'border-black bg-[#8db394] text-black shadow-[4px_6px_0_#feeed5]'
+                          : 'border-[#3e3e3e] bg-[#1a1a1a] text-[#b4b4b4] hover:border-[#feeed5]/40'
+                      }`}
+                    >
+                      <span>{opt.emoji}</span> {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </label>
 
               <button
                 type="submit"
