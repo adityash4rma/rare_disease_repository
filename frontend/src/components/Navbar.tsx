@@ -1,4 +1,4 @@
-import { Database, Search, User, Menu } from 'lucide-react';
+import { Database, Search, User } from 'lucide-react';
 
 const Navbar = () => {
   return (

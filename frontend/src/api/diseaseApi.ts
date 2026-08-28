@@ -1,21 +1,24 @@
 import apiClient from './apiClient';
+import type { Disease, DiseaseListResponse } from '../types/api';
 
 export const diseaseApi = {
-  // 1. Get all diseases (for the Explore page)
-  getAllDiseases: async () => {
-    const response = await apiClient.get('/api/v1/diseases');
+  getAllDiseases: async (search?: string, category?: string, limit = 50): Promise<DiseaseListResponse> => {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (category) params.append('category', category);
+    if (limit) params.append('limit', limit.toString());
+
+    const response = await apiClient.get<DiseaseListResponse>(`/api/diseases?${params.toString()}`);
     return response.data;
   },
 
-  // 2. Get details for one disease (for the Detail page)
-  getDiseaseById: async (id: string) => {
-    const response = await apiClient.get(`/api/v1/diseases/${id}`);
+  getDiseaseById: async (id: string | number): Promise<Disease> => {
+    const response = await apiClient.get<Disease>(`/api/diseases/${id}`);
     return response.data;
   },
 
-  // 3. Search for diseases
-  searchDiseases: async (query: string) => {
-    const response = await apiClient.get(`/api/v1/search?q=${query}`);
+  createDisease: async (diseaseData: Partial<Disease>): Promise<Disease> => {
+    const response = await apiClient.post<Disease>('/api/diseases', diseaseData);
     return response.data;
   }
 };

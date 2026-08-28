@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Database, Search, FlaskConical, 
-  ShieldCheck, Share2, Landmark, Dna, ChevronDown, UserCog, LogOut, Network
+  ShieldCheck, Landmark, Dna, ChevronDown, UserCog, LogOut, Network
 } from 'lucide-react';
 
 const Sidebar: FC = () => {

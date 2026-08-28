@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { 
   Search, Bell, Mail, HelpCircle, CheckCircle2, 
   Landmark, Database, Users, Trophy, BarChart3, 
-  TrendingUp, MapPin, ChevronRight 
+  TrendingUp, MapPin 
 } from 'lucide-react';
 
 // --- Types ---
@@ -223,16 +223,6 @@ const BreakdownBox = ({ label, count, color, border }: any) => (
   <div className={`p-4 rounded-2xl border ${border} ${color} text-center`}>
      <p className="text-lg font-black leading-none mb-1">{count}</p>
      <p className="text-[9px] font-bold uppercase tracking-tighter opacity-80">{label}</p>
-  </div>
-);
-
-const HospitalResult = ({ name, address, icon: Icon }: any) => (
-  <div className="p-4 px-6 border-b border-slate-50 flex items-center gap-4 hover:bg-slate-50 transition-all cursor-pointer">
-    <div className="w-8 h-8 bg-indigo-50 text-indigo-500 rounded-lg flex items-center justify-center shadow-sm"><Icon size={16}/></div>
-    <div>
-      <p className="text-xs font-black text-slate-800 leading-none">{name}</p>
-      <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">{address}</p>
-    </div>
   </div>
 );
 

@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { 
   Search, Bell, Mail, HelpCircle, CheckCircle2, 
-  MessageSquare, Check, X, MoreVertical, ChevronLeft, ChevronRight 
+  MessageSquare
 } from 'lucide-react';
 
 const AccessRequests: FC = () => {

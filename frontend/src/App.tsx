@@ -9,14 +9,17 @@ import Research from './pages/Research';
 import AccessRequests from './pages/AccessRequests';
 import Onboarding from './pages/Onboarding';
 import Institutions from './pages/Institutions';
+import FederatedLearning from './pages/FederatedLearning';
 import Login from './pages/Login';
+import { SignUp } from './pages/SignUp';
+import { AuthProvider } from './context/AuthContext';
 
 // Wrapper to handle layout logic
 const AppContent: FC = () => {
   const location = useLocation();
 
   // Pages that should NOT show the sidebar
-  const hideSidebarPaths = ['/onboarding', '/login'];
+  const hideSidebarPaths = ['/onboarding', '/login', '/signup'];
   const shouldHideSidebar = hideSidebarPaths.includes(location.pathname);
 
   return (
@@ -33,7 +36,9 @@ const AppContent: FC = () => {
           <Route path="/repository" element={<DiseaseRepository />} />
           <Route path="/datasets" element={<DatasetExplorer />} />
           <Route path="/studies" element={<Research />} />
+          <Route path="/research" element={<Research />} />
           <Route path="/requests" element={<AccessRequests />} />
+          <Route path="/federated" element={<FederatedLearning />} />
           <Route path="/institutions" element={<Institutions />} />
           
           {/* Deep Dive Pages */}
@@ -41,6 +46,7 @@ const AppContent: FC = () => {
           
           {/* Full Screen Pages (No Sidebar) */}
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </main>
@@ -50,9 +56,11 @@ const AppContent: FC = () => {
 
 const App: FC = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 };
 

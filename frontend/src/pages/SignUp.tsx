@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, Search } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 import chartsImage from '../assets/charts.svg'
 import googleLogo from '../assets/google.svg'
@@ -8,23 +9,39 @@ import waveImage from '../assets/wave.svg'
 
 export function SignUp() {
   const navigate = useNavigate()
+  const { register } = useAuth()
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setError(null)
+    setSubmitting(true)
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
 
-    localStorage.setItem('rarexUserName', fullName || 'Researcher')
-    localStorage.setItem('rarexUserEmail', email.trim())
-
-    navigate('/studies')
+    try {
+      await register({
+        email: email.trim(),
+        password,
+        full_name: fullName,
+        role: 'researcher',
+      })
+      navigate('/')
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || 'Registration failed. Email might already be registered.'
+      setError(msg)
+    } finally {
+      setSubmitting(false)
+    }
   }
+
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#0f0f0f] font-sans text-white">
@@ -100,6 +117,13 @@ export function SignUp() {
             <p className="mb-6 mt-2 text-center text-[clamp(0.75rem,1.1vw,1.05rem)] text-[#c9c9c9] md:mb-7 2xl:mb-10 2xl:mt-4">
               Enter your personal data to create your account
             </p>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-900/40 border border-red-500 text-red-200 text-sm rounded">
+                {error}
+              </div>
+            )}
+
 
             <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2 md:gap-4 2xl:gap-9">
               <button
@@ -218,20 +242,21 @@ export function SignUp() {
 
               <button
                 type="submit"
-                className="mx-auto block h-12 w-full border-2 border-black bg-[#8db394] text-2xl font-semibold text-black sm:w-[80%] 2xl:h-[63px] 2xl:w-[353px] 2xl:text-[35px]"
+                disabled={submitting}
+                className="mx-auto block h-12 w-full border-2 border-black bg-[#8db394] text-2xl font-semibold text-black sm:w-[80%] 2xl:h-[63px] 2xl:w-[353px] 2xl:text-[35px] disabled:opacity-50"
               >
-                Sign up
+                {submitting ? 'Signing up...' : 'Sign up'}
               </button>
             </form>
 
             <p className="mt-3 text-center text-xs tracking-[0.8px] text-[#868686] 2xl:mt-5 2xl:text-base 2xl:tracking-[1.26px]">
               Already have an Account?{' '}
-              <a
-                href="/login"
+              <Link
+                to="/login"
                 className="font-semibold text-[#feeed5] no-underline"
               >
                 Login
-              </a>
+              </Link>
             </p>
           </div>
         </section>

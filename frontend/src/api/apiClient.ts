@@ -1,14 +1,13 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  // This is the default URL for a FastAPI backend
   baseURL: 'http://localhost:8000', 
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Optional: This automatically attaches your Login Token to every request
+// Attach JWT token to requests if present
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -17,4 +16,16 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-export default apiClient;
+// Handle 401 response (token expired or invalid)
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rarexUser');
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;

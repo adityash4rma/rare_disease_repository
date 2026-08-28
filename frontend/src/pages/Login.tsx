@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, Dna, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 import googleLogo from '../assets/google.svg'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,11 +26,11 @@ export default function Login() {
 
     try {
       setSubmitting(true)
-      localStorage.setItem('rarexUserEmail', email.trim())
-      // Redirect to Dashboard after login
+      await login({ email: email.trim(), password })
       navigate('/')
-    } catch {
-      setErrorMessage('Unable to log in. Please try again.')
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || 'Unable to log in. Please verify your credentials.'
+      setErrorMessage(msg)
     } finally {
       setSubmitting(false)
     }

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { 
   Stethoscope, GraduationCap, FileSearch, ArrowRight, ArrowLeft, 
   Search, Trash2, Plus, Landmark, Building2, ShieldCheck, CheckCircle2,
-  MapPin, Info, ChevronDown, FileText // Added missing icons
+  MapPin, Info, ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

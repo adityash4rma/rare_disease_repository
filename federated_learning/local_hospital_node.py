@@ -11,13 +11,16 @@ import flwr as fl
 # 1. Parse CLI Arguments
 parser = argparse.ArgumentParser(description="Hospital Node Client for Federated Learning")
 parser.add_argument("--node-id", type=str, required=True, help="Hospital Node ID (e.g., A, B, or C)")
+parser.add_argument("--server-address", type=str, default=os.getenv("SERVER_ADDRESS", "127.0.0.1:8090"), help="FL Server Address (host:port)")
 args = parser.parse_args()
 
 # 2. Robust Local CSV Data Loader
 def load_local_data(node_id):
     file_path = f"hospitals/hospital_{node_id.lower()}/hospital_{node_id.lower()}.csv"
     if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Dataset for Node '{node_id}' not found at {file_path}. Run partition_data.py first.")
+        # Auto-generate if missing
+        from data.synthetic.generate_data import generate_synthetic_dataset
+        generate_synthetic_dataset()
     
     try:
         df = pd.read_csv(file_path, sep=None, engine='python', encoding='utf-8', on_bad_lines='skip')
@@ -38,20 +41,16 @@ def load_local_data(node_id):
 
     X = torch.tensor(X_raw, dtype=torch.float32)
     y = torch.tensor(y_raw, dtype=torch.float32).unsqueeze(1)
+    return X, y
 
-    dataset = TensorDataset(X, y)
-    loader = DataLoader(dataset, batch_size=32, shuffle=True)
-    return loader, X.shape[1]
-
-# 3. Flower NumPy Client Definition
+# 3. Flower NumPy Client
 class HospitalNodeClient(fl.client.NumPyClient):
     def __init__(self, node_id):
         self.node_id = node_id
-        self.train_loader, num_features = load_local_data(node_id)
-        
         self.model = nn.Sequential(
-            nn.Linear(num_features, 64),
+            nn.Linear(10, 64),
             nn.ReLU(),
+            nn.Dropout(0.2),
             nn.Linear(64, 32),
             nn.ReLU(),
             nn.Linear(32, 1),
@@ -59,6 +58,12 @@ class HospitalNodeClient(fl.client.NumPyClient):
         )
         self.criterion = nn.BCELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        
+        X, y = load_local_data(node_id)
+        dataset = TensorDataset(X, y)
+        self.train_loader = DataLoader(dataset, batch_size=16, shuffle=True)
+        self.num_samples = len(X)
+        print(f"Hospital {self.node_id} loaded {self.num_samples} local patient records.")
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
@@ -69,22 +74,19 @@ class HospitalNodeClient(fl.client.NumPyClient):
         self.model.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        try:
-            self.set_parameters(parameters)
-            self.model.train()
-            
-            for epoch in range(2):
-                for x_batch, y_batch in self.train_loader:
-                    self.optimizer.zero_grad()
-                    outputs = self.model(x_batch)
-                    loss = self.criterion(outputs, y_batch)
-                    loss.backward()
-                    self.optimizer.step()
-                    
-            return self.get_parameters(config={}), len(self.train_loader.dataset), {}
-        except Exception as e:
-            print(f"ERROR during local fit on Node {self.node_id}: {e}")
-            raise e
+        self.set_parameters(parameters)
+        self.model.train()
+        
+        epochs = 2
+        for epoch in range(epochs):
+            for x_batch, y_batch in self.train_loader:
+                self.optimizer.zero_grad()
+                outputs = self.model(x_batch)
+                loss = self.criterion(outputs, y_batch)
+                loss.backward()
+                self.optimizer.step()
+
+        return self.get_parameters(config={}), self.num_samples, {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
@@ -111,11 +113,12 @@ class HospitalNodeClient(fl.client.NumPyClient):
 
 # 4. Entry Point
 if __name__ == "__main__":
+    server_addr = args.server_address
     print(f"--- Initializing Hospital {args.node_id} Node ---")
     numpy_client = HospitalNodeClient(args.node_id)
-    print(f"Connecting Hospital {args.node_id} to Server at 127.0.0.1:8090...")
+    print(f"Connecting Hospital {args.node_id} to Server at {server_addr}...")
     
     fl.client.start_client(
-        server_address="127.0.0.1:8090",
+        server_address=server_addr,
         client=numpy_client.to_client()
     )
