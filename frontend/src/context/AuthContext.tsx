@@ -15,8 +15,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem('rarexUser');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -25,8 +32,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (storedToken) {
         try {
           const currentUser = await authApi.getCurrentUser();
-          setUser(currentUser);
-          setToken(storedToken);
+          if (currentUser && typeof currentUser === 'object' && currentUser.id) {
+            setUser(currentUser);
+            localStorage.setItem('rarexUser', JSON.stringify(currentUser));
+            setToken(storedToken);
+          } else {
+            throw new Error('Invalid user payload');
+          }
         } catch {
           // Token expired or invalid
           localStorage.removeItem('token');
@@ -43,18 +55,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (credentials: UserLogin) => {
     const data = await authApi.login(credentials);
-    localStorage.setItem('token', data.access_token);
-    localStorage.setItem('rarexUser', JSON.stringify(data.user));
-    setToken(data.access_token);
-    setUser(data.user);
+    if (data && data.access_token) {
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('rarexUser', JSON.stringify(data.user));
+      setToken(data.access_token);
+      setUser(data.user);
+    }
   };
 
   const register = async (userData: UserRegister) => {
     const data = await authApi.register(userData);
-    localStorage.setItem('token', data.access_token);
-    localStorage.setItem('rarexUser', JSON.stringify(data.user));
-    setToken(data.access_token);
-    setUser(data.user);
+    if (data && data.access_token) {
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('rarexUser', JSON.stringify(data.user));
+      setToken(data.access_token);
+      setUser(data.user);
+    }
   };
 
   const logout = () => {

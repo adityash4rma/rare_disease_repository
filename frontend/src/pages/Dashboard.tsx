@@ -54,11 +54,15 @@ const Dashboard: FC = () => {
     const fetchData = async () => {
       try {
         const [statsData, distData] = await Promise.all([
-          analyticsApi.getDashboardStats(),
-          analyticsApi.getDiseaseDistribution(5),
+          analyticsApi.getDashboardStats().catch(() => null),
+          analyticsApi.getDiseaseDistribution(5).catch(() => []),
         ]);
-        setStats(statsData);
-        setDistributions(distData);
+        if (statsData && typeof statsData === 'object' && typeof statsData.total_patients === 'number') {
+          setStats(statsData);
+        }
+        if (Array.isArray(distData)) {
+          setDistributions(distData);
+        }
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
@@ -186,15 +190,15 @@ const Dashboard: FC = () => {
               </div>
             </div>
             <div className="flex-1 space-y-2">
-              {distributions.length > 0 ? (
+              {Array.isArray(distributions) && distributions.length > 0 ? (
                 distributions.slice(0, 4).map((d, idx) => {
                   const colors = ['bg-indigo-500', 'bg-purple-500', 'bg-blue-400', 'bg-orange-400'];
                   return (
                     <LegendItem 
-                      key={d.disease_name} 
-                      label={d.disease_name} 
-                      count={d.patient_count.toString()} 
-                      percent={`${d.percentage}%`} 
+                      key={d?.disease_name || idx} 
+                      label={d?.disease_name || 'Rare Disease'} 
+                      count={(d?.patient_count ?? 0).toString()} 
+                      percent={`${d?.percentage ?? 0}%`} 
                       color={colors[idx % colors.length]} 
                     />
                   );

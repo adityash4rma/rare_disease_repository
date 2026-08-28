@@ -13,6 +13,7 @@ import FederatedLearning from './pages/FederatedLearning';
 import Login from './pages/Login';
 import { SignUp } from './pages/SignUp';
 import { AuthProvider } from './context/AuthContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Wrapper to handle layout logic
 const AppContent: FC = () => {
@@ -56,11 +57,13 @@ const AppContent: FC = () => {
 
 const App: FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 
