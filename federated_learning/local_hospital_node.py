@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 from collections import OrderedDict
+from sqlalchemy import create_engine
 import flwr as fl
 from backend.model_def import RareDiseaseNet
 
@@ -28,23 +29,36 @@ FEATURE_COLUMNS = [
     "ALT_U_L"
 ]
 
-# 2. Robust Local CSV Data Loader
+# 2. Local PostgreSQL Data Loader
 def load_local_data(node_id):
-    file_path = f"hospitals/hospital_{node_id.lower()}/hospital_{node_id.lower()}.csv"
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Hospital data partition not found: {file_path}")
+    node_lower = node_id.lower()
+    
+    # Check for custom DATABASE_URL environment variable or construct container URL dynamically
+    db_url = os.getenv(
+        "DATABASE_URL", 
+        f"postgresql://admin:hospital_password_123@db-hospital-{node_lower}:5432/hospital_{node_lower}_db"
+    )
+    
+    print(f"[SQL] Connecting Hospital {node_id} to PostgreSQL database...")
     
     try:
-        df = pd.read_csv(file_path, sep=None, engine='python', encoding='utf-8', on_bad_lines='skip')
-    except Exception:
-        df = pd.read_csv(file_path, sep=None, engine='python', encoding='latin1', on_bad_lines='skip')
+        # Create SQLAlchemy connection engine
+        engine = create_engine(db_url)
+        
+        # Query patient clinical records from local hospital database
+        query = "SELECT * FROM patient_clinical_records;"
+        df = pd.read_sql(query, con=engine)
+        print(f"[SQL] Successfully retrieved {len(df)} records from local database.")
+        
+    except Exception as e:
+        raise RuntimeError(f"Failed to query PostgreSQL database for Hospital {node_id} at {db_url}: {str(e)}")
 
-    # If dataset has the standard 10 feature columns, use them; otherwise use first 10 numerical columns
+    # Extract 10 clinical features (by name or index position)
     available_cols = [c for c in FEATURE_COLUMNS if c in df.columns]
     if len(available_cols) == 10:
         X_df = df[FEATURE_COLUMNS].copy()
     else:
-        # Fallback to first 10 columns
+        # Fallback to first 10 numerical/categorical feature columns
         X_df = df.iloc[:, :10].copy()
         for col in X_df.columns:
             if X_df[col].dtype == 'object':
@@ -58,7 +72,7 @@ def load_local_data(node_id):
     std = np.std(X_raw, axis=0, keepdims=True) + 1e-7
     X_normalized = (X_raw - mean) / std
 
-    # Target: High Risk (Progressive) -> 1.0, Stable -> 0.0
+    # Target: High Risk -> 1.0, Stable -> 0.0
     if "Clinical_Outcome_Target" in df.columns:
         y_raw = (df["Clinical_Outcome_Target"].astype(str).str.contains("High Risk", case=False)).astype(np.float32).values
     elif "Clinical_Severity_Score_1_10" in df.columns:
@@ -82,7 +96,7 @@ class HospitalNodeClient(fl.client.NumPyClient):
         dataset = TensorDataset(X, y)
         self.train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
         self.num_samples = len(X)
-        print(f"Hospital {self.node_id} loaded {self.num_samples} local clinical records.")
+        print(f"Hospital {self.node_id} ready with {self.num_samples} local clinical records.")
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
