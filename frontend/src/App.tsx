@@ -8,29 +8,40 @@ import DiseaseDetail from './pages/DiseaseDetail';
 import Research from './pages/Research';
 import AccessRequests from './pages/AccessRequests';
 import Onboarding from './pages/Onboarding';
-import FederatedLearning from './pages/FederatedLearning';
+import Institutions from './pages/Institutions';
+import Login from './pages/Login';
 
-
+// Wrapper to handle layout logic
 const AppContent: FC = () => {
   const location = useLocation();
-  const hideSidebar = location.pathname === '/onboarding';
+
+  // Pages that should NOT show the sidebar
+  const hideSidebarPaths = ['/onboarding', '/login'];
+  const shouldHideSidebar = hideSidebarPaths.includes(location.pathname);
 
   return (
     <div className="flex min-h-screen bg-[#F4F7FE] antialiased">
-      {/* 1. Only show Sidebar if not on Onboarding page */}
-      {!hideSidebar && <Sidebar />}
+      {/* Show Sidebar only if the current path isn't in the hide list */}
+      {!shouldHideSidebar && <Sidebar />}
       
-      {/* 2. MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <Routes>
+          {/* Main Dashboard */}
           <Route path="/" element={<Dashboard />} />
+          
+          {/* Main Navigation Pages */}
           <Route path="/repository" element={<DiseaseRepository />} />
           <Route path="/datasets" element={<DatasetExplorer />} />
           <Route path="/studies" element={<Research />} />
           <Route path="/requests" element={<AccessRequests />} />
-          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/institutions" element={<Institutions />} />
+          
+          {/* Deep Dive Pages */}
           <Route path="/disease/:id" element={<DiseaseDetail />} />
-          <Route path="/federated" element={<FederatedLearning />} />
+          
+          {/* Full Screen Pages (No Sidebar) */}
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </main>
     </div>

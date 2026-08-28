@@ -3,21 +3,21 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Database, Search, FlaskConical, 
-  ShieldCheck, Share2, Landmark, Dna, ChevronDown, UserCog, LogOut
+  ShieldCheck, Share2, Landmark, Dna, ChevronDown, UserCog, LogOut, Network
 } from 'lucide-react';
 
 const Sidebar: FC = () => {
   const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  // Removed Results & Insights and Profile & Settings from here
+  // Define the main navigation items
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Database, label: 'Disease Repository', path: '/repository' },
     { icon: Search, label: 'Dataset Explorer', path: '/datasets' },
     { icon: FlaskConical, label: 'Research Studies', path: '/studies' },
     { icon: ShieldCheck, label: 'Access Requests', path: '/requests' },
-    { icon: Share2, label: 'Federated Learning', path: '/federated' },
+    { icon: Network, label: 'Federated Learning', path: '/federated' },
     { icon: Landmark, label: 'Institutions', path: '/institutions' },
   ];
 
@@ -26,7 +26,7 @@ const Sidebar: FC = () => {
       
       {/* 1. Branding (DNA Logo) */}
       <div className="flex items-center gap-3 mb-10">
-        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 flex-shrink-0">
            <Dna className="text-white rotate-45" size={24} />
         </div>
         <div>
@@ -37,7 +37,7 @@ const Sidebar: FC = () => {
         </div>
       </div>
 
-      {/* 2. Enhanced User Profile Box with Dropdown Option */}
+      {/* 2. User Profile Box (With Dropdown) */}
       <div className="relative mb-10">
         <button 
           onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -53,34 +53,36 @@ const Sidebar: FC = () => {
           <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
         </button>
 
-        {/* Profile Action Menu */}
+        {/* Dropdown Menu */}
         {isProfileOpen && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-indigo-50 shadow-xl p-2 animate-in slide-in-from-top-2 duration-200 z-50">
             <Link 
-              to="/settings" 
-              onClick={() => setIsProfileOpen(false)}
+              to="/login" 
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
             >
               <UserCog size={16} />
-              <span className="text-[11px] font-bold uppercase tracking-wider">Account Settings</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest">Account Settings</span>
             </Link>
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+            <Link 
+              to="/login"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+            >
               <LogOut size={16} />
-              <span className="text-[11px] font-bold uppercase tracking-wider">Sign Out</span>
-            </button>
+              <span className="text-[10px] font-bold uppercase tracking-widest">Sign Out</span>
+            </Link>
           </div>
         )}
       </div>
 
       {/* 3. Navigation Links */}
-      <nav className="flex-1 space-y-1 overflow-y-auto">
+      <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link 
               to={item.path} 
               key={item.label} 
-              className={`flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-200 group
+              className={`flex items-center gap-4 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-200 group
                 ${isActive 
                   ? 'bg-[#B2D8D0] text-slate-800 font-bold shadow-lg shadow-teal-100' 
                   : 'text-slate-500 hover:bg-white hover:text-indigo-600'}`}
@@ -96,7 +98,7 @@ const Sidebar: FC = () => {
       </nav>
 
       {/* 4. Security Footer */}
-      <div className="mt-auto pt-6">
+      <div className="mt-auto pt-6 border-t border-indigo-100/30">
         <div className="text-[9px] text-slate-400 font-bold flex gap-2 mb-4 px-2 uppercase tracking-tighter">
            <span>Secure</span> • <span>Decentralized</span> • <span>Trusted</span>
         </div>
