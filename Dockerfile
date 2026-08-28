@@ -16,8 +16,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy project source code
 COPY . /app/
 
+# Pre-seed the 10,000 Indian dataset into SQLite DB inside the Docker image
+RUN python -m backend.seed_indian_dataset
+
 # Expose FastAPI (8000) and Flower FL gRPC (8090)
 EXPOSE 8000 8090
 
-# Default command: FastAPI API backend
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command: FastAPI API backend with dynamic Render PORT support
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

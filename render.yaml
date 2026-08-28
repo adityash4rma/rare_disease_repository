@@ -1,23 +1,23 @@
 services:
   # ==============================================================================
-  # 1. FastAPI REST API Backend
+  # 1. FastAPI REST API Backend (Docker Runtime)
   # ==============================================================================
   - type: web
     name: rare-disease-api
-    runtime: python
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
     plan: free
     region: oregon
-    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu && python -m backend.seed_indian_dataset"
-    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       - key: PYTHONPATH
-        value: .
+        value: /app
       - key: DEBUG
         value: "false"
       - key: CORS_ORIGINS
-        value: "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000"
+        value: "*"
       - key: JWT_SECRET_KEY
         generateValue: true
 
