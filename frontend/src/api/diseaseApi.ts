@@ -8,8 +8,13 @@ export const diseaseApi = {
     if (category) params.append('category', category);
     if (limit) params.append('limit', limit.toString());
 
-    const response = await apiClient.get<DiseaseListResponse>(`/api/diseases?${params.toString()}`);
-    return response.data;
+    const response = await apiClient.get<any>(`/api/diseases?${params.toString()}`);
+    const data = response.data;
+    const diseaseList = data.items || data.diseases || [];
+    return {
+      diseases: diseaseList,
+      total: data.total ?? diseaseList.length,
+    };
   },
 
   getDiseaseById: async (id: string | number): Promise<Disease> => {

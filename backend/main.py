@@ -50,6 +50,7 @@ from backend.api.fhir import router as fhir_router
 from backend.api.analytics import router as analytics_router
 from backend.api.audit import router as audit_router
 from backend.api.users import router as users_router
+from backend.api.prediction import router as prediction_router
 
 app.include_router(auth_router)
 app.include_router(patients_router)
@@ -61,6 +62,7 @@ app.include_router(fhir_router)
 app.include_router(analytics_router)
 app.include_router(audit_router)
 app.include_router(users_router)
+app.include_router(prediction_router)
 
 
 @app.get("/", tags=["Health"])

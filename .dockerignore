@@ -1,0 +1,26 @@
+# Git and local IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv
+backend/venv
+.pytest_cache
+
+# Node / Frontend
+node_modules
+frontend/node_modules
+npm-debug.log*
+
+# Database / temporary files
+*.db
+*.sqlite
+*.sqlite3
+temp.txt

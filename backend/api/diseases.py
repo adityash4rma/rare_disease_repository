@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.auth.dependencies import get_current_user
+from backend.auth.dependencies import get_current_user, get_optional_user
 from backend.database import get_db
 from backend.models.disease import Disease
 from backend.models.diagnosis import Diagnosis
@@ -26,7 +26,7 @@ async def list_diseases(
     search: str = Query(None),
     category: str = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """List diseases with pagination and search."""
     stmt = select(Disease)
@@ -53,19 +53,19 @@ async def list_diseases(
     result = await db.execute(stmt)
     diseases = result.scalars().all()
 
-    # Get patient counts for each disease
-    items = []
-    for disease in diseases:
+    # Enrich with patient counts
+    enriched = []
+    for d in diseases:
         patient_count_result = await db.execute(
-            select(func.count(Diagnosis.id)).where(Diagnosis.disease_id == disease.id)
+            select(func.count(Diagnosis.id)).where(Diagnosis.disease_id == d.id)
         )
         patient_count = patient_count_result.scalar() or 0
-        response = DiseaseResponse.model_validate(disease)
-        response.patient_count = patient_count
-        items.append(response)
+        resp = DiseaseResponse.model_validate(d)
+        resp.patient_count = patient_count
+        enriched.append(resp)
 
     return DiseaseListResponse(
-        items=items,
+        items=enriched,
         total=total,
         page=page,
         page_size=page_size,
@@ -76,7 +76,7 @@ async def list_diseases(
 async def get_disease(
     disease_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """Get a single disease."""
     result = await db.execute(select(Disease).where(Disease.id == disease_id))

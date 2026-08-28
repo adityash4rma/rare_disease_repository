@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.auth.dependencies import get_current_user
+from backend.auth.dependencies import get_current_user, get_optional_user
 from backend.database import get_db
 from backend.models.hospital import Hospital
 from backend.models.patient import Patient
@@ -26,7 +26,7 @@ async def list_hospitals(
     search: str = Query(None),
     status_filter: str = Query(None, alias="status"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """List hospitals with pagination and search."""
     stmt = select(Hospital)

@@ -5,7 +5,7 @@ Analytics API routes - Dashboard statistics and charts data.
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.auth.dependencies import get_current_user
+from backend.auth.dependencies import get_current_user, get_optional_user
 from backend.database import get_db
 from backend.models.user import User
 from backend.schemas.analytics import (
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 @router.get("/dashboard", response_model=DashboardStats)
 async def dashboard_stats(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """Get dashboard summary statistics."""
     return await get_dashboard_stats(db)
@@ -35,7 +35,7 @@ async def dashboard_stats(
 async def disease_distribution(
     limit: int = Query(10, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """Get disease distribution data for charts."""
     return await get_disease_distribution(db, limit)

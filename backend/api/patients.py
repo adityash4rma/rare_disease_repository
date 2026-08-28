@@ -7,7 +7,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from backend.auth.dependencies import get_current_user
+from backend.auth.dependencies import get_current_user, get_optional_user
 from backend.database import get_db
 from backend.models.patient import Patient
 from backend.models.diagnosis import Diagnosis
@@ -32,7 +32,7 @@ async def list_patients(
     sex: str = Query(None),
     hospital_id: str = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     """List patients with pagination and search."""
     stmt = select(Patient)
