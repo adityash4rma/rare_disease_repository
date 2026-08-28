@@ -1,17 +1,32 @@
 import type { FC } from 'react';
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Database, Search, FlaskConical, 
-  ShieldCheck, Landmark, Dna, ChevronDown, UserCog, LogOut, Network
+  ShieldCheck, Landmark, Dna, ChevronDown, UserCog, LogOut, Network,
+  Settings, Users, BarChart3, ClipboardList
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar: FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  // Define the main navigation items
-  const menuItems = [
+  const userRole = user?.role || 'researcher';
+  const userName = user?.full_name || 'Guest Researcher';
+
+  // Role-based avatar seed and color
+  const avatarConfig: Record<string, { seed: string; bg: string; roleLabel: string }> = {
+    admin: { seed: 'Admin', bg: 'bg-red-200', roleLabel: 'Administrator' },
+    researcher: { seed: userName.split(' ')[0] || 'Researcher', bg: 'bg-purple-200', roleLabel: 'Researcher' },
+    clinician: { seed: userName.split(' ')[0] || 'Clinician', bg: 'bg-teal-200', roleLabel: 'Clinician' },
+  };
+  const avatar = avatarConfig[userRole] || avatarConfig.researcher;
+
+  // Role-based navigation items
+  const baseMenuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Database, label: 'Disease Repository', path: '/repository' },
     { icon: Search, label: 'Dataset Explorer', path: '/datasets' },
@@ -20,6 +35,31 @@ const Sidebar: FC = () => {
     { icon: Network, label: 'Federated Learning', path: '/federated' },
     { icon: Landmark, label: 'Institutions', path: '/institutions' },
   ];
+
+  // Admin gets extra items
+  const adminExtras = [
+    { icon: Users, label: 'User Management', path: '/admin/users' },
+    { icon: BarChart3, label: 'System Analytics', path: '/admin/analytics' },
+    { icon: Settings, label: 'Platform Settings', path: '/admin/settings' },
+  ];
+
+  // Clinician gets a slightly different set
+  const clinicianExtras = [
+    { icon: ClipboardList, label: 'My Patients', path: '/my-patients' },
+  ];
+
+  let menuItems = [...baseMenuItems];
+  if (userRole === 'admin') {
+    menuItems = [...menuItems, ...adminExtras];
+  } else if (userRole === 'clinician') {
+    menuItems = [...menuItems, ...clinicianExtras];
+  }
+
+  const handleSignOut = () => {
+    setIsProfileOpen(false);
+    logout();
+    navigate('/login');
+  };
 
   return (
     <aside className="w-64 bg-[#E0E7FF]/40 h-screen sticky top-0 p-6 border-r border-slate-200 flex flex-col rounded-tr-[3rem] z-50">
@@ -37,18 +77,20 @@ const Sidebar: FC = () => {
         </div>
       </div>
 
-      {/* 2. User Profile Box (With Dropdown) */}
+      {/* 2. Dynamic User Profile Box */}
       <div className="relative mb-10">
         <button 
           onClick={() => setIsProfileOpen(!isProfileOpen)}
-          className={`w-full flex items-center gap-3 px-2 py-3 rounded-2xl border transition-all duration-300 ${isProfileOpen ? 'bg-white shadow-md border-indigo-100' : 'bg-white/60 border-white hover:bg-white/80 shadow-sm'}`}
+          className={`w-full flex items-center gap-3 px-2 py-3 rounded-2xl border transition-all duration-300 cursor-pointer ${isProfileOpen ? 'bg-white shadow-md border-indigo-100' : 'bg-white/60 border-white hover:bg-white/80 shadow-sm'}`}
         >
-          <div className="w-10 h-10 bg-purple-200 rounded-xl overflow-hidden border-2 border-white flex-shrink-0">
-             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya" alt="Dr. Priya" />
+          <div className={`w-10 h-10 ${avatar.bg} rounded-xl overflow-hidden border-2 border-white flex-shrink-0`}>
+             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(avatar.seed)}`} alt={userName} />
           </div>
           <div className="flex-1 text-left overflow-hidden">
-            <p className="text-[11px] font-bold text-slate-800 leading-none truncate">Dr. Priya Sharma</p>
-            <p className="text-[10px] text-indigo-500 font-bold mt-1 uppercase tracking-tighter">Researcher</p>
+            <p className="text-[11px] font-bold text-slate-800 leading-none truncate">{userName}</p>
+            <p className={`text-[10px] font-bold mt-1 uppercase tracking-tighter ${
+              userRole === 'admin' ? 'text-red-500' : userRole === 'clinician' ? 'text-teal-600' : 'text-indigo-500'
+            }`}>{avatar.roleLabel}</p>
           </div>
           <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -58,18 +100,19 @@ const Sidebar: FC = () => {
           <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-indigo-50 shadow-xl p-2 animate-in slide-in-from-top-2 duration-200 z-50">
             <Link 
               to="/login" 
+              onClick={() => setIsProfileOpen(false)}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
             >
               <UserCog size={16} />
               <span className="text-[10px] font-bold uppercase tracking-widest">Account Settings</span>
             </Link>
-            <Link 
-              to="/login"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+            <button 
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
             >
               <LogOut size={16} />
               <span className="text-[10px] font-bold uppercase tracking-widest">Sign Out</span>
-            </Link>
+            </button>
           </div>
         )}
       </div>
@@ -107,8 +150,10 @@ const Sidebar: FC = () => {
              <ShieldCheck size={14} />
           </div>
           <div>
-            <p className="text-[9px] text-teal-800 font-bold uppercase leading-none">Session Secured</p>
-            <p className="text-[8px] text-slate-400 font-mono mt-1 break-all tracking-tighter uppercase font-bold">did:rarex:8f3a</p>
+            <p className="text-[9px] text-teal-800 font-bold uppercase leading-none">Session {isAuthenticated ? 'Secured' : 'Guest'}</p>
+            <p className="text-[8px] text-slate-400 font-mono mt-1 break-all tracking-tighter uppercase font-bold">
+              {isAuthenticated ? `did:rarex:${(user?.id || '').toString().slice(0, 8)}` : 'not authenticated'}
+            </p>
           </div>
         </div>
       </div>
