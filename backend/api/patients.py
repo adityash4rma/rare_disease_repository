@@ -43,13 +43,15 @@ async def list_patients(
             Patient.first_name.ilike(f"%{search}%"),
             Patient.last_name.ilike(f"%{search}%"),
             Patient.mrn.ilike(f"%{search}%"),
+            Patient.address_city.ilike(f"%{search}%"),
+            Patient.ethnicity.ilike(f"%{search}%"),
         )
         stmt = stmt.where(search_filter)
         count_stmt = count_stmt.where(search_filter)
 
-    if sex:
-        stmt = stmt.where(Patient.sex == sex)
-        count_stmt = count_stmt.where(Patient.sex == sex)
+    if sex and sex.lower() != "all":
+        stmt = stmt.where(Patient.sex == sex.lower())
+        count_stmt = count_stmt.where(Patient.sex == sex.lower())
 
     if hospital_id:
         stmt = stmt.where(Patient.hospital_id == hospital_id)
@@ -57,14 +59,23 @@ async def list_patients(
 
     total = (await db.execute(count_stmt)).scalar() or 0
 
-    stmt = stmt.order_by(Patient.created_at.desc())
+    stmt = stmt.options(selectinload(Patient.hospital))
+    stmt = stmt.order_by(Patient.mrn.asc())
     stmt = stmt.offset((page - 1) * page_size).limit(page_size)
 
     result = await db.execute(stmt)
     patients = result.scalars().all()
 
+    enriched_items = []
+    for p in patients:
+        item = PatientResponse.model_validate(p)
+        if p.hospital:
+            item.hospital_name = p.hospital.name
+            item.hospital_code = p.hospital.code
+        enriched_items.append(item)
+
     return PatientListResponse(
-        items=[PatientResponse.model_validate(p) for p in patients],
+        items=enriched_items,
         total=total,
         page=page,
         page_size=page_size,

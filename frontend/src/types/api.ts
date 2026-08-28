@@ -48,20 +48,26 @@ export interface DiseaseListResponse {
 }
 
 export interface Patient {
-  id: number;
+  id: string | number;
   patient_code: string;
+  first_name?: string;
+  last_name?: string;
   age: number;
   sex: string;
   ethnicity: string;
   city: string;
   country: string;
-  hospital_id: number;
+  hospital_id?: string | number;
+  hospital_name?: string;
+  hospital_code?: string;
   created_at: string;
 }
 
 export interface PatientListResponse {
   patients: Patient[];
   total: number;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface Hospital {

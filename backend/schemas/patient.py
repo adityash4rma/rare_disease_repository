@@ -50,6 +50,8 @@ class PatientResponse(BaseModel):
     email: Optional[str] = None
     notes: Optional[str] = None
     hospital_id: Optional[str] = None
+    hospital_name: Optional[str] = None
+    hospital_code: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
