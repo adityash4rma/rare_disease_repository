@@ -28,7 +28,7 @@ services:
     name: rare-disease-frontend
     runtime: static
     rootDir: frontend
-    buildCommand: "npm install && npm run build"
+    buildCommand: "npm install && VITE_API_URL=https://rare-disease-api.onrender.com npm run build"
     staticPublishPath: dist
     autoDeploy: true
     routes:
@@ -37,7 +37,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: rare-disease-api
-          property: host
+        value: https://rare-disease-api.onrender.com
