@@ -1,45 +1,149 @@
 import type { FC } from 'react';
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, Bell, Mail, HelpCircle, CheckCircle2, 
   Plus, ChevronLeft, ChevronRight, Activity, Dna, 
-  Camera, Stethoscope, TrendingUp, Info 
+  Camera, Stethoscope, TrendingUp, X, 
+  FileText, Landmark, Users, Sparkles
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 // --- Types ---
-type StudyType = 'clinical' | 'genetic' | 'imaging' | 'treatment';
+type StudyType = 'clinical' | 'genetic' | 'imaging' | 'treatment' | 'outcome';
 
-type Study = {
+interface Study {
   id: number;
   name: string;
   disease: string;
+  diseaseId: string;
   patients: string;
-  availability: 'Available' | 'Requested';
+  leadCenter: string;
+  centersCount: number;
+  availability: 'Available' | 'Active' | 'Requested';
   types: StudyType[];
-};
+  protocolId: string;
+  piName: string;
+  description: string;
+  biomarkers: string[];
+  orphanDrug: string;
+}
 
-const sampleStudies: Study[] = [
-  { id: 1, name: 'CF-Dataset-001', disease: 'Cystic Fibrosis', patients: '1,245', availability: 'Available', types: ['clinical', 'genetic', 'imaging'] },
-  { id: 2, name: 'RareGen-2024', disease: 'Duchenne MD', patients: '932', availability: 'Available', types: ['clinical', 'genetic', 'treatment'] },
-  { id: 3, name: 'SMA-Study-2024', disease: 'Spinal Muscular Atrophy', patients: '756', availability: 'Available', types: ['clinical', 'genetic', 'imaging'] },
-  { id: 4, name: 'SCD-Registry-01', disease: 'Sickle Cell Disease', patients: '1,120', availability: 'Available', types: ['clinical', 'genetic', 'treatment'] },
-  { id: 5, name: 'Epi-Rare-2024', disease: 'Rare Epileptic Encephalopathy', patients: '512', availability: 'Requested', types: ['clinical', 'genetic'] },
-  { id: 6, name: 'CF-Dataset-002', disease: 'Cystic Fibrosis', patients: '1,100', availability: 'Available', types: ['clinical', 'genetic'] },
-  { id: 7, name: 'RareGen-Alpha', disease: 'Duchenne MD', patients: '450', availability: 'Available', types: ['clinical', 'imaging'] },
+const studiesData: Study[] = [
+  {
+    id: 1,
+    name: 'IND-SMA-Registry-2024',
+    disease: 'Spinal Muscular Atrophy (SMA)',
+    diseaseId: '27db5ddd-7f2a-47dc-b0c1-419d79818815',
+    patients: '833',
+    leadCenter: 'NIMHANS Bengaluru',
+    centersCount: 8,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'imaging', 'treatment', 'outcome'],
+    protocolId: 'ICMR-SMA-CT-2024-01',
+    piName: 'Dr. Rajesh Kulkarni, DM (Neurology)',
+    description: 'Pan-India longitudinal cohort study evaluating SMN1/SMN2 copy number variation, developmental motor checkpoints, and therapeutic outcomes under Nusinersen/Risdiplam access programs.',
+    biomarkers: ['SMN1 Exon 7/8 Deletion', 'Serum Neurofilament Light Chain (NfL)', 'CHOP-INTEND Motor Score'],
+    orphanDrug: 'Risdiplam / Nusinersen'
+  },
+  {
+    id: 2,
+    name: 'IND-WD-HepatoGen-01',
+    disease: 'Wilson Disease',
+    diseaseId: 'd17f5763-3a1b-4518-8543-7822f495d364',
+    patients: '808',
+    leadCenter: 'AIIMS New Delhi',
+    centersCount: 8,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'treatment', 'outcome'],
+    protocolId: 'AIIMS-GEN-WD-2024',
+    piName: 'Dr. Aarav Sharma, MD (Medical Genetics)',
+    description: 'Multi-centric genomic registry evaluating ATP7B mutational spectrum, 24-hour urinary copper clearance, Kayser-Fleischer ring progression, and zinc/penicillamine chelator efficacy.',
+    biomarkers: ['Serum Ceruloplasmin', '24h Urinary Copper', 'ALT/AST Transaminases', 'ATP7B c.813C>A Mutation'],
+    orphanDrug: 'D-Penicillamine / Trientine'
+  },
+  {
+    id: 3,
+    name: 'IND-Gaucher-Macrophage-AI',
+    disease: 'Gaucher Disease Type 1',
+    diseaseId: '33469052-81d8-4288-854b-b2d2da6d813a',
+    patients: '874',
+    leadCenter: 'Christian Medical College (CMC) Vellore',
+    centersCount: 8,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'imaging', 'outcome'],
+    protocolId: 'CMC-GBA-STUDY-04',
+    piName: 'Dr. Priya Iyer, PhD (Genomics)',
+    description: 'Comprehensive lysosomal storage cohort tracking GBA N370S/L444P alleles, Erlenmeyer flask skeletal bone deformity progression, and long-term enzyme replacement therapy (ERT) responses.',
+    biomarkers: ['Glucosylsphingosine (Lyso-Gb1)', 'Chitotriosidase Activity', 'Platelet Count', 'Bone Mineral Density DEXA'],
+    orphanDrug: 'Imiglucerase (ERT) / Miglustat'
+  },
+  {
+    id: 4,
+    name: 'IND-AKU-Ochronosis-Study',
+    disease: 'Alkaptonuria',
+    diseaseId: 'd772f959-86b5-4fa5-9a01-9020a21af2fb',
+    patients: '844',
+    leadCenter: 'SGPGI Lucknow',
+    centersCount: 8,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'imaging'],
+    protocolId: 'SGPGI-AKU-COHORT-24',
+    piName: 'Dr. Ananya Bose, MD (Rheumatology)',
+    description: 'National clinical investigation on homogentisic acid 1,2-dioxygenase (HGD) deficiency, ochronotic spondyloarthropathy severity, aortic valve calcification, and Nitisinone response markers.',
+    biomarkers: ['Urinary Homogentisic Acid (HGA)', 'Serum HGA Concentration', 'Spine MRI Sclerosis Index'],
+    orphanDrug: 'Nitisinone'
+  },
+  {
+    id: 5,
+    name: 'Rare-FL-Federated-RiskNet',
+    disease: 'Multi-Disease Federated AI',
+    diseaseId: '',
+    patients: '3,359',
+    leadCenter: 'ICMR National Rare Disease Consortium',
+    centersCount: 8,
+    availability: 'Active',
+    types: ['clinical', 'genetic', 'outcome'],
+    protocolId: 'FL-RAREX-AI-2024',
+    piName: 'National Registry Administrator (ICMR)',
+    description: 'Decentralized Federated Learning trial training RareDiseaseNet across 8 Indian hospital nodes to predict clinical disease progression without raw patient data centralization.',
+    biomarkers: ['10 Multi-Modal Clinical & Lab Parameters', 'Federated Averaging Round Weights'],
+    orphanDrug: 'Multi-Target Regimen'
+  }
+];
+
+const dataDictionaryItems = [
+  { field: 'Patient_ID', type: 'String (UUID / Code)', desc: 'Unique anonymized patient identifier (e.g. IND-RDR-0001).' },
+  { field: 'Rare_Disease_Name', type: 'Categorical', desc: 'Verified clinical diagnosis (SMA, Wilson Disease, Gaucher Disease, Alkaptonuria).' },
+  { field: 'Mutated_Gene', type: 'String (HGNC)', desc: 'Causal human gene locus (SMN1, ATP7B, GBA, HGD).' },
+  { field: 'Specialized_Biomarker_Name', type: 'String', desc: 'Target clinical biomarker (e.g. Serum Ceruloplasmin, Urinary HGA, Lyso-Gb1).' },
+  { field: 'Biomarker_Value', type: 'Float / Unit', desc: 'Measured quantitative biomarker laboratory result.' },
+  { field: 'Clinical_Severity_Score_1_10', type: 'Integer (1-10)', desc: 'Standardized clinical disease severity index.' },
+  { field: 'Systolic_BP_mmHg / Diastolic_BP_mmHg', type: 'Integer', desc: 'Resting hemodynamic blood pressure vitals.' },
+  { field: 'ALT_U_L / AST_U_L', type: 'Float (U/L)', desc: 'Liver function transaminase enzymatic assays.' },
+  { field: 'Serum_Creatinine_mg_dL', type: 'Float (mg/dL)', desc: 'Renal function and filtration biomarker.' },
+  { field: 'Platelet_Count_cells_mcL', type: 'Integer (cells/mcL)', desc: 'Hematological platelet count (critical for Gaucher/Wilson).' },
+  { field: 'Prescribed_Orphan_Drug', type: 'String (INN)', desc: 'Targeted rare disease therapeutic regimen.' },
+  { field: 'Clinical_Outcome_Target', type: 'Binary Target', desc: 'High Risk (Progressive) vs Therapeutic Responder (Stable).' },
 ];
 
 const Research: FC = () => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
   const [activeTab, setActiveTab] = useState<'studies' | 'dictionary'>('studies');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activePage, setActivePage] = useState(1);
+  const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
 
-  // Filter logic for the search bar
+  // Filter studies by search
   const filteredStudies = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return sampleStudies;
-    return sampleStudies.filter((study) => 
+    if (!query) return studiesData;
+    return studiesData.filter((study) => 
       study.name.toLowerCase().includes(query) || 
-      study.disease.toLowerCase().includes(query)
+      study.disease.toLowerCase().includes(query) ||
+      study.leadCenter.toLowerCase().includes(query) ||
+      study.protocolId.toLowerCase().includes(query)
     );
   }, [searchTerm]);
 
@@ -47,12 +151,12 @@ const Research: FC = () => {
     <div className="flex-1 bg-[#F4F7FE] min-h-screen p-8 overflow-y-auto">
       
       {/* 1. Header Bar */}
-      <header className="flex justify-between items-center mb-10">
+      <header className="flex justify-between items-center mb-8">
         <div className="relative w-[500px]">
           <Search className="absolute left-4 top-3 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search for studies, diseases, institutions..." 
+            placeholder="Search studies by disease, protocol, center..." 
             className="w-full pl-12 pr-4 py-2.5 bg-white rounded-full border-none shadow-sm outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -64,37 +168,49 @@ const Research: FC = () => {
             <Mail size={20} className="cursor-pointer hover:text-indigo-600" />
             <HelpCircle size={20} className="cursor-pointer hover:text-indigo-600" />
           </div>
-          <button className="flex items-center gap-2 bg-white border border-indigo-100 px-4 py-2 rounded-full text-indigo-600 font-bold text-[10px] uppercase shadow-sm">
-            <CheckCircle2 size={14} /> Verified Researcher
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2 bg-white border border-indigo-100 px-4 py-2 rounded-full text-indigo-600 font-bold text-xs shadow-sm">
+              <CheckCircle2 size={14} /> {user?.full_name || 'Verified Researcher'}
+            </div>
+          ) : (
+            <button 
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-2 bg-white border border-indigo-100 px-4 py-2 rounded-full text-indigo-600 font-bold text-xs shadow-sm"
+            >
+              <CheckCircle2 size={14} /> Log In
+            </button>
+          )}
         </div>
       </header>
 
       {/* 2. Page Title Section */}
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Research Studies</h1>
-          <p className="text-slate-400 text-sm mt-1 font-medium">Manage and explore active research studies.</p>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Research Studies & Registry Trials</h1>
+          <p className="text-slate-400 text-xs mt-1 font-medium">Explore pan-India clinical cohort studies, molecular registries, and multi-institutional trials.</p>
         </div>
-        <button className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold text-xs shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
-          <Plus size={18} /> Create New Study
+        <button 
+          onClick={() => navigate('/requests')}
+          className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold text-xs shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all cursor-pointer"
+        >
+          <Plus size={16} /> Request Research Access
         </button>
       </div>
 
       {/* 3. Navigation Tabs */}
-      <nav className="flex gap-10 border-b border-slate-200 mb-10 px-4">
+      <nav className="flex gap-10 border-b border-slate-200 mb-8 px-2">
         <button 
           onClick={() => setActiveTab('studies')}
-          className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'studies' ? 'text-indigo-600' : 'text-slate-300 hover:text-slate-500'}`}
+          className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative cursor-pointer ${activeTab === 'studies' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          All Studies
+          Active Studies ({studiesData.length})
           {activeTab === 'studies' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-600 rounded-full" />}
         </button>
         <button 
           onClick={() => setActiveTab('dictionary')}
-          className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'dictionary' ? 'text-indigo-600' : 'text-slate-300 hover:text-slate-500'}`}
+          className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative cursor-pointer ${activeTab === 'dictionary' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          Data Dictionary
+          Data Dictionary ({dataDictionaryItems.length} Fields)
           {activeTab === 'dictionary' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-600 rounded-full" />}
         </button>
       </nav>
@@ -106,49 +222,58 @@ const Research: FC = () => {
             <table className="w-full text-left border-collapse">
               <thead className="bg-[#E0E7FF]/30 text-[10px] text-slate-500 font-black uppercase tracking-widest">
                 <tr>
-                  <th className="px-8 py-5">Study Name</th>
-                  <th className="px-8 py-5">Disease</th>
-                  <th className="px-8 py-5">Types</th>
-                  <th className="px-8 py-5">Patients</th>
-                  <th className="px-8 py-5">Availability</th>
-                  <th className="px-8 py-5 text-center">Action</th>
+                  <th className="px-6 py-5">Study / Protocol</th>
+                  <th className="px-6 py-5">Rare Disease Target</th>
+                  <th className="px-6 py-5">Lead Institution</th>
+                  <th className="px-6 py-5">Data Types</th>
+                  <th className="px-6 py-5">Cohort Size</th>
+                  <th className="px-6 py-5">Status</th>
+                  <th className="px-6 py-5 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="text-xs text-slate-600 font-bold">
                 {filteredStudies.map((study) => (
-                  <tr key={study.id} className="border-b border-slate-50 hover:bg-indigo-50/30 transition-colors">
-                    <td className="px-8 py-4 text-slate-800">{study.name}</td>
-                    <td className="px-8 py-4">{study.disease}</td>
-                    <td className="px-8 py-4 flex gap-1.5">
+                  <tr key={study.id} className="border-b border-slate-50 hover:bg-indigo-50/40 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="text-slate-800 font-black font-mono">{study.name}</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">{study.protocolId}</p>
+                    </td>
+                    <td className="px-6 py-4 text-slate-700">{study.disease}</td>
+                    <td className="px-6 py-4 text-slate-500 font-medium">{study.leadCenter}</td>
+                    <td className="px-6 py-4 flex gap-1.5 mt-1">
                       {study.types.map(type => <TypeBadge key={type} type={type} />)}
                     </td>
-                    <td className="px-8 py-4 font-mono">{study.patients}</td>
-                    <td className="px-8 py-4">
-                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${study.availability === 'Available' ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-400'}`}>
+                    <td className="px-6 py-4 font-mono text-indigo-700">{study.patients} Patients</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
+                        study.availability === 'Available' ? 'bg-teal-50 text-teal-600' :
+                        study.availability === 'Active' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
+                      }`}>
                         {study.availability}
                       </span>
                     </td>
-                    <td className="px-8 py-4 text-center text-indigo-600 cursor-pointer hover:underline">View</td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => setSelectedStudy(study)}
+                        className="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-sm"
+                      >
+                        View Protocol
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-between items-center mb-10 px-2">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Showing 1 to {filteredStudies.length} of 240 studies</p>
+          {/* Pagination & Summary */}
+          <div className="flex justify-between items-center mb-8 px-2">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+              Showing {filteredStudies.length} of {studiesData.length} Research Protocols
+            </p>
             <div className="flex gap-2">
               <button className="p-2 text-slate-300 hover:text-indigo-600"><ChevronLeft size={18}/></button>
-              {[1, 2, 3, 4, 5].map(num => (
-                <button 
-                  key={num} 
-                  onClick={() => setActivePage(num)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs transition-all ${activePage === num ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-white'}`}
-                >
-                  {num}
-                </button>
-              ))}
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs bg-indigo-600 text-white shadow-md">1</button>
               <button className="p-2 text-slate-300 hover:text-indigo-600"><ChevronRight size={18}/></button>
             </div>
           </div>
@@ -163,11 +288,130 @@ const Research: FC = () => {
           </div>
         </>
       ) : (
-        <div className="bg-white p-20 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
-          <Info className="mx-auto text-slate-200 mb-4" size={48} />
-          <p className="text-slate-400 font-bold text-sm">Data Dictionary content will appear here.</p>
+        /* Data Dictionary Table */
+        <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm p-6 mb-8">
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-slate-800">10,000 Indian Clinical Cohort Schema</h3>
+            <p className="text-xs text-slate-400 mt-1">Field definitions and data dictionary specifications for research interoperability.</p>
+          </div>
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-[#E0E7FF]/30 text-[10px] text-slate-500 font-black uppercase tracking-widest">
+              <tr>
+                <th className="px-6 py-4">Field Name</th>
+                <th className="px-6 py-4">Data Type</th>
+                <th className="px-6 py-4">Description & Clinical Relevance</th>
+              </tr>
+            </thead>
+            <tbody className="text-xs text-slate-700">
+              {dataDictionaryItems.map((item) => (
+                <tr key={item.field} className="border-b border-slate-50 hover:bg-slate-50/50">
+                  <td className="px-6 py-3.5 font-mono font-bold text-indigo-700">{item.field}</td>
+                  <td className="px-6 py-3.5 font-semibold text-slate-500">{item.type}</td>
+                  <td className="px-6 py-3.5 text-slate-600">{item.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
+
+      {/* 5. Study Detail Interactive Modal */}
+      {selectedStudy && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-6 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-2xl w-full border border-slate-100 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            
+            {/* Modal Header */}
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  {selectedStudy.protocolId}
+                </span>
+                <h2 className="text-2xl font-bold text-slate-800 mt-2 tracking-tight">{selectedStudy.name}</h2>
+                <p className="text-sm font-semibold text-indigo-600">{selectedStudy.disease}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedStudy(null)}
+                className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Study Description & Objectives</h4>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  {selectedStudy.description}
+                </p>
+              </div>
+
+              {/* Grid Details */}
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="p-4 bg-purple-50/50 rounded-2xl border border-purple-100/50">
+                  <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                    <Landmark size={14} /> Principal Investigator
+                  </p>
+                  <p className="font-bold text-slate-800">{selectedStudy.piName}</p>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">{selectedStudy.leadCenter}</p>
+                </div>
+
+                <div className="p-4 bg-teal-50/50 rounded-2xl border border-teal-100/50">
+                  <p className="text-[10px] font-black text-teal-700 uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                    <Users size={14} /> Cohort Size & Participating Centers
+                  </p>
+                  <p className="font-bold text-slate-800">{selectedStudy.patients} Patient Cohort</p>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">{selectedStudy.centersCount} Apex Indian Medical Centers</p>
+                </div>
+              </div>
+
+              {/* Target Biomarkers */}
+              <div>
+                <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-amber-500" /> Target Biomarkers & Endpoints
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedStudy.biomarkers.map((bio) => (
+                    <span key={bio} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl text-[11px] font-bold">
+                      {bio}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Prescribed Orphan Regimen */}
+              <div>
+                <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Prescribed Orphan Drug Regimen</h4>
+                <p className="text-xs font-bold text-slate-800 font-mono">{selectedStudy.orphanDrug}</p>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex gap-4 mt-8 pt-6 border-t border-slate-100">
+              <button 
+                onClick={() => {
+                  setSelectedStudy(null);
+                  navigate('/datasets');
+                }}
+                className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-3.5 rounded-2xl font-bold text-xs shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all cursor-pointer"
+              >
+                <FileText size={16} /> Explore Cohort Datasets
+              </button>
+              <button 
+                onClick={() => {
+                  setSelectedStudy(null);
+                  navigate('/requests');
+                }}
+                className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs transition-colors cursor-pointer"
+              >
+                Request Federated Access
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
@@ -175,15 +419,17 @@ const Research: FC = () => {
 // --- Helper Components ---
 
 const TypeBadge = ({ type }: { type: StudyType }) => {
-  const configs = {
+  const configs: Record<StudyType, { icon: any; color: string }> = {
     clinical: { icon: Activity, color: 'bg-blue-100 text-blue-500' },
     genetic: { icon: Dna, color: 'bg-purple-100 text-purple-500' },
     imaging: { icon: Camera, color: 'bg-green-100 text-green-500' },
     treatment: { icon: Stethoscope, color: 'bg-red-100 text-red-500' },
+    outcome: { icon: TrendingUp, color: 'bg-indigo-100 text-indigo-500' },
   };
-  const { icon: Icon, color } = configs[type];
+  const config = configs[type] || configs.clinical;
+  const Icon = config.icon;
   return (
-    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shadow-sm ${color}`}>
+    <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-xs ${config.color}`}>
       <Icon size={12} />
     </div>
   );
