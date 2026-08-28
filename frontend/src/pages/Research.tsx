@@ -29,7 +29,7 @@ interface Study {
   orphanDrug: string;
 }
 
-const studiesData: Study[] = [
+const allStudiesData: Study[] = [
   {
     id: 1,
     name: 'IND-SMA-Registry-2024',
@@ -109,6 +109,118 @@ const studiesData: Study[] = [
     description: 'Decentralized Federated Learning trial training RareDiseaseNet across 8 Indian hospital nodes to predict clinical disease progression without raw patient data centralization.',
     biomarkers: ['10 Multi-Modal Clinical & Lab Parameters', 'Federated Averaging Round Weights'],
     orphanDrug: 'Multi-Target Regimen'
+  },
+  {
+    id: 6,
+    name: 'CF-CFTR-India-Registry',
+    disease: 'Cystic Fibrosis',
+    diseaseId: '',
+    patients: '620',
+    leadCenter: 'AIIMS New Delhi',
+    centersCount: 5,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'treatment'],
+    protocolId: 'AIIMS-CFTR-IND-02',
+    piName: 'Dr. S. K. Kabra, MD (Pediatrics)',
+    description: 'Multi-center registry tracking CFTR mutations in Indian children, sweat chloride testing profiles, and long-term pulmonary function metrics under targeted CFTR potentiator therapies.',
+    biomarkers: ['Sweat Chloride Assay', 'CFTR DeltaF508/Exon 10 Sequencing', 'FEV1 Spirometry Index'],
+    orphanDrug: 'Ivacaftor / Elexacaftor'
+  },
+  {
+    id: 7,
+    name: 'DMD-ExonSkip-Trial',
+    disease: 'Duchenne Muscular Dystrophy (DMD)',
+    diseaseId: '',
+    patients: '740',
+    leadCenter: 'NIMHANS Bengaluru',
+    centersCount: 6,
+    availability: 'Active',
+    types: ['clinical', 'genetic', 'imaging', 'outcome'],
+    protocolId: 'NIMHANS-DMD-EXON51',
+    piName: 'Dr. Madhu Nagappa, DM',
+    description: 'Clinical observational study evaluating dystrophin gene deletions, North Star Ambulatory Assessment (NSAA) scoring, and cardiac MRI fibrosis patterns in pediatric cohorts.',
+    biomarkers: ['DMD Gene Multiplex MLPA', 'Serum Creatine Kinase (CK)', 'Cardiac T1 Mapping'],
+    orphanDrug: 'Eteplirsen / Deflazacort'
+  },
+  {
+    id: 8,
+    name: 'HD-CAG-Repeat-Consortium',
+    disease: 'Huntington Disease',
+    diseaseId: '',
+    patients: '315',
+    leadCenter: 'IPGMER Kolkata',
+    centersCount: 4,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'imaging'],
+    protocolId: 'IPGMER-HTT-CAG-09',
+    piName: 'Dr. Alok Banerjee, MD (Genetics)',
+    description: 'Investigation of huntingtin (HTT) exon 1 CAG repeat expansions, motor chorea progression, and brain structural voxel-based morphometry in eastern and north-eastern Indian populations.',
+    biomarkers: ['HTT Exon 1 CAG Repeat Size', 'UHDRS Motor Rating Score', 'Striatal Volumetry MRI'],
+    orphanDrug: 'Deutetrabenazine'
+  },
+  {
+    id: 9,
+    name: 'SCD-Gen-Variant-Mapping',
+    disease: 'Sickle Cell Disease',
+    diseaseId: '',
+    patients: '1,420',
+    leadCenter: 'GMC Nagpur & ICMR-NIRRCH',
+    centersCount: 7,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'treatment', 'outcome'],
+    protocolId: 'NIRRCH-HBB-GLU6VAL-24',
+    piName: 'Dr. Smita Mahale, PhD',
+    description: 'Extensive genetic mapping of HBB sickle mutation alleles, Arab-Indian beta-globin haplotype variations, and hydroxyurea induction response biomarkers in central tribal districts.',
+    biomarkers: ['Fetal Hemoglobin (HbF) %', 'HBB Sanger Sequencing', 'Serum Ferritin', 'Transcranial Doppler'],
+    orphanDrug: 'Hydroxyurea / Voxelotor'
+  },
+  {
+    id: 10,
+    name: 'MPS-Mucopolysaccharidosis-PanIndia',
+    disease: 'Mucopolysaccharidosis (MPS I/II)',
+    diseaseId: '',
+    patients: '280',
+    leadCenter: 'Tata Memorial Centre (TMC) Mumbai',
+    centersCount: 5,
+    availability: 'Active',
+    types: ['clinical', 'genetic', 'imaging'],
+    protocolId: 'TMC-MPS-REGISTRY-2024',
+    piName: 'Dr. Neha Shah, DM (Hematology-Oncology)',
+    description: 'Prospective registry analyzing IDUA and IDS enzymatic activity, glycosaminoglycan (GAG) excretion, dysostosis multiplex skeletal manifestations, and pre/post HSCT outcomes.',
+    biomarkers: ['Urinary GAG Electrophoresis', 'IDUA Enzyme Activity Assay', 'Echocardiography Ejection Fraction'],
+    orphanDrug: 'Laronidase / Idursulfase'
+  },
+  {
+    id: 11,
+    name: 'FD-Fabry-CardioRenal-Study',
+    disease: 'Fabry Disease',
+    diseaseId: '',
+    patients: '210',
+    leadCenter: 'Christian Medical College (CMC) Vellore',
+    centersCount: 4,
+    availability: 'Available',
+    types: ['clinical', 'genetic', 'treatment', 'outcome'],
+    protocolId: 'CMC-GLA-FABRY-24',
+    piName: 'Dr. George Thomas, MD (Nephrology)',
+    description: 'Long-term cardio-renal outcome monitoring in patients with GLA mutations, assessing globotriaosylsphingosine (Lyso-Gb3) reduction and agalsidase beta enzyme therapy.',
+    biomarkers: ['Plasma Lyso-Gb3', 'Alpha-Galactosidase A Assay', 'Estimated GFR eGFR Slope', 'Left Ventricular Mass Index'],
+    orphanDrug: 'Agalsidase Beta / Migalastat'
+  },
+  {
+    id: 12,
+    name: 'FD-Fibrodysplasia-FOP-IndianCohort',
+    disease: 'Fibrodysplasia Ossificans Progressiva (FOP)',
+    diseaseId: '',
+    patients: '85',
+    leadCenter: 'GCRI Ahmedabad',
+    centersCount: 3,
+    availability: 'Requested',
+    types: ['clinical', 'genetic', 'imaging'],
+    protocolId: 'GCRI-ACVR1-FOP-2024',
+    piName: 'Dr. Rajesh Mehta, MS (Orthopedics)',
+    description: 'Rare cohort tracking ACVR1 c.617G>A (R206H) mutations, heterotopic ossification flare dynamics, and preventative management protocols across western Indian centers.',
+    biomarkers: ['ACVR1 Sequencing', 'Whole-Body Low-Dose CT (WBCT)', 'Alkaline Phosphatase ALP'],
+    orphanDrug: 'Palovarotene'
   }
 ];
 
@@ -133,19 +245,39 @@ const Research: FC = () => {
 
   const [activeTab, setActiveTab] = useState<'studies' | 'dictionary'>('studies');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
 
   // Filter studies by search
   const filteredStudies = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return studiesData;
-    return studiesData.filter((study) => 
+    if (!query) return allStudiesData;
+    return allStudiesData.filter((study) => 
       study.name.toLowerCase().includes(query) || 
       study.disease.toLowerCase().includes(query) ||
       study.leadCenter.toLowerCase().includes(query) ||
       study.protocolId.toLowerCase().includes(query)
     );
   }, [searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudies.length / pageSize));
+
+  const paginatedStudies = useMemo(() => {
+    const startIndex = (page - 1) * pageSize;
+    return filteredStudies.slice(startIndex, startIndex + pageSize);
+  }, [filteredStudies, page, pageSize]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages && newPage !== page) {
+      setPage(newPage);
+    }
+  };
+
+  const handleSearchChange = (val: string) => {
+    setSearchTerm(val);
+    setPage(1);
+  };
 
   return (
     <div className="flex-1 bg-[#F4F7FE] min-h-screen p-8 overflow-y-auto">
@@ -159,7 +291,7 @@ const Research: FC = () => {
             placeholder="Search studies by disease, protocol, center..." 
             className="w-full pl-12 pr-4 py-2.5 bg-white rounded-full border-none shadow-sm outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <div className="flex items-center gap-6">
@@ -200,10 +332,10 @@ const Research: FC = () => {
       {/* 3. Navigation Tabs */}
       <nav className="flex gap-10 border-b border-slate-200 mb-8 px-2">
         <button 
-          onClick={() => setActiveTab('studies')}
+          onClick={() => { setActiveTab('studies'); setPage(1); }}
           className={`pb-4 text-[11px] font-bold uppercase tracking-widest transition-all relative cursor-pointer ${activeTab === 'studies' ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          Active Studies ({studiesData.length})
+          Active Studies ({filteredStudies.length})
           {activeTab === 'studies' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-600 rounded-full" />}
         </button>
         <button 
@@ -232,49 +364,92 @@ const Research: FC = () => {
                 </tr>
               </thead>
               <tbody className="text-xs text-slate-600 font-bold">
-                {filteredStudies.map((study) => (
-                  <tr key={study.id} className="border-b border-slate-50 hover:bg-indigo-50/40 transition-colors">
-                    <td className="px-6 py-4">
-                      <p className="text-slate-800 font-black font-mono">{study.name}</p>
-                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">{study.protocolId}</p>
-                    </td>
-                    <td className="px-6 py-4 text-slate-700">{study.disease}</td>
-                    <td className="px-6 py-4 text-slate-500 font-medium">{study.leadCenter}</td>
-                    <td className="px-6 py-4 flex gap-1.5 mt-1">
-                      {study.types.map(type => <TypeBadge key={type} type={type} />)}
-                    </td>
-                    <td className="px-6 py-4 font-mono text-indigo-700">{study.patients} Patients</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
-                        study.availability === 'Available' ? 'bg-teal-50 text-teal-600' :
-                        study.availability === 'Active' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
-                      }`}>
-                        {study.availability}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => setSelectedStudy(study)}
-                        className="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-sm"
-                      >
-                        View Protocol
-                      </button>
+                {paginatedStudies.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-bold">
+                      No research studies match your search criteria.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  paginatedStudies.map((study) => (
+                    <tr key={study.id} className="border-b border-slate-50 hover:bg-indigo-50/40 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="text-slate-800 font-black font-mono">{study.name}</p>
+                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">{study.protocolId}</p>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">{study.disease}</td>
+                      <td className="px-6 py-4 text-slate-500 font-medium">{study.leadCenter}</td>
+                      <td className="px-6 py-4 flex gap-1.5 mt-1">
+                        {study.types.map(type => <TypeBadge key={type} type={type} />)}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-indigo-700">{study.patients} Patients</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
+                          study.availability === 'Available' ? 'bg-teal-50 text-teal-600' :
+                          study.availability === 'Active' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
+                        }`}>
+                          {study.availability}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => setSelectedStudy(study)}
+                          className="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-xs"
+                        >
+                          View Protocol
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Pagination & Summary */}
-          <div className="flex justify-between items-center mb-8 px-2">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              Showing {filteredStudies.length} of {studiesData.length} Research Protocols
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 px-2">
+            <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wide">
+              Showing {filteredStudies.length > 0 ? (page - 1) * pageSize + 1 : 0} to {Math.min(page * pageSize, filteredStudies.length)} of {filteredStudies.length} Research Protocols
             </p>
-            <div className="flex gap-2">
-              <button className="p-2 text-slate-300 hover:text-indigo-600"><ChevronLeft size={18}/></button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs bg-indigo-600 text-white shadow-md">1</button>
-              <button className="p-2 text-slate-300 hover:text-indigo-600"><ChevronRight size={18}/></button>
+            
+            <div className="flex items-center gap-1.5">
+              {/* Previous Button */}
+              <button 
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 1}
+                className={`p-2 rounded-lg border transition-all ${page === 1 ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer'}`}
+                title="Previous Page"
+              >
+                <ChevronLeft size={16}/>
+              </button>
+
+              {/* Numbered Page Buttons */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pNum) => {
+                const isCurrent = pNum === page;
+                return (
+                  <button 
+                    key={pNum} 
+                    onClick={() => handlePageChange(pNum)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                      isCurrent 
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' 
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600'
+                    }`}
+                  >
+                    {pNum}
+                  </button>
+                );
+              })}
+
+              {/* Next Button */}
+              <button 
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page === totalPages}
+                className={`p-2 rounded-lg border transition-all ${page === totalPages ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer'}`}
+                title="Next Page"
+              >
+                <ChevronRight size={16}/>
+              </button>
             </div>
           </div>
 
