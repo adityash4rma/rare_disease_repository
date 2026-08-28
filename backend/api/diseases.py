@@ -37,13 +37,16 @@ async def list_diseases(
             Disease.name.ilike(f"%{search}%"),
             Disease.orpha_code.ilike(f"%{search}%"),
             Disease.icd10_code.ilike(f"%{search}%"),
+            Disease.category.ilike(f"%{search}%"),
+            Disease.description.ilike(f"%{search}%"),
         )
         stmt = stmt.where(search_filter)
         count_stmt = count_stmt.where(search_filter)
 
-    if category:
-        stmt = stmt.where(Disease.category == category)
-        count_stmt = count_stmt.where(Disease.category == category)
+    if category and category.lower() != "all":
+        category_filter = Disease.category.ilike(f"%{category}%")
+        stmt = stmt.where(category_filter)
+        count_stmt = count_stmt.where(category_filter)
 
     total = (await db.execute(count_stmt)).scalar() or 0
 

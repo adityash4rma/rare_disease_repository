@@ -10,10 +10,10 @@ export const diseaseApi = {
 
     const response = await apiClient.get<any>(`/api/diseases?${params.toString()}`);
     const data = response.data;
-    const diseaseList = data.items || data.diseases || [];
+    const diseaseList = data?.items || data?.diseases || (Array.isArray(data) ? data : []);
     return {
-      diseases: diseaseList,
-      total: data.total ?? diseaseList.length,
+      diseases: Array.isArray(diseaseList) ? diseaseList : [],
+      total: data?.total ?? diseaseList.length,
     };
   },
 

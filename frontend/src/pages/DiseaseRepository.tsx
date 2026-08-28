@@ -63,7 +63,7 @@ const DiseaseRepository: FC = () => {
     return a.name.localeCompare(b.name);
   });
 
-  const categories = ['All', 'Pulmonary', 'Neurological', 'Neuromuscular', 'Metabolic', 'Hematological', 'Genetic'];
+  const categories = ['All', 'Metabolic', 'Neuromuscular', 'Lysosomal Storage', 'Hepatic', 'Inborn Error', 'Genetic'];
 
   return (
     <div className="flex-1 bg-white min-h-screen p-8 overflow-y-auto">
